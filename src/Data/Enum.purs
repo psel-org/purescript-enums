@@ -57,9 +57,10 @@ instance enumBoolean :: Enum Boolean where
   pred true = Just false
   pred _= Nothing
 
+-- Emacs's Int is not bounded
 instance enumInt :: Enum Int where
-  succ n = if n < top then Just (n + 1) else Nothing
-  pred n = if n > bottom then Just (n - 1) else Nothing
+  succ n = Just (n + 1)
+  pred n = Just (n - 1)
 
 instance enumChar :: Enum Char where
   succ = defaultSucc charToEnum toCharCode
@@ -313,9 +314,10 @@ defaultFromEnum = go 0 where
 diag :: forall a. a -> Tuple a a
 diag a = Tuple a a
 
+-- Emacs characters situation differs from that of JS.
+-- Change `fromCharCode` to return Mabye Char.
 charToEnum :: Int -> Maybe Char
-charToEnum n | n >= bottom && n <= top = Just (fromCharCode n)
-charToEnum _ = Nothing
+charToEnum n = fromCharCode Just Nothing n
 
 foreign import toCharCode :: Char -> Int
-foreign import fromCharCode :: Int -> Char
+foreign import fromCharCode :: (Char -> Maybe Char) -> Maybe Char -> Int -> Maybe Char
